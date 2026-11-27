@@ -1,116 +1,705 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ABM | Control de Compras y Contrataciones</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Control de Compras y Contrataciones</title>
+
 <style>
-:root{--navy:#102b46;--blue:#1769aa;--cyan:#e8f3fb;--ink:#172536;--muted:#6d7b8b;--line:#e3e9ef;--bg:#f4f7fa;--green:#16845b;--amber:#a66a00;--red:#b33b3b}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Inter,Segoe UI,Arial,sans-serif}
-header{background:linear-gradient(120deg,#102b46,#174e78);color:white;padding:22px 28px;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
-.brand{display:flex;gap:13px;align-items:center}.logo{width:46px;height:46px;border-radius:12px;background:#fff;color:var(--navy);display:grid;place-items:center;font-weight:900;font-size:18px}
-h1{font-size:21px;margin:0}header p{margin:3px 0 0;color:#d4e5f4;font-size:13px}.pill{border:1px solid #7ba5c8;padding:7px 12px;border-radius:30px;font-size:12px}
-.layout{display:grid;grid-template-columns:235px 1fr;min-height:calc(100vh - 90px)}aside{background:#fff;border-right:1px solid var(--line);padding:18px 12px}
-.nav{display:flex;flex-direction:column;gap:6px}.nav button{border:0;background:transparent;text-align:left;padding:12px;border-radius:9px;color:#435366;cursor:pointer;font-weight:600}.nav button.active,.nav button:hover{background:var(--cyan);color:var(--blue)}
-main{padding:26px;max-width:1450px;width:100%;margin:auto}.page{display:none}.page.active{display:block}.heading{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px;flex-wrap:wrap}h2{margin:0 0 5px;font-size:24px}.sub{color:var(--muted);margin:0}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:17px;box-shadow:0 2px 7px #102b4608}.kpi small{color:var(--muted)}.kpi strong{display:block;font-size:26px;margin:7px 0}.kpi span{font-size:12px;color:var(--muted)}.two{display:grid;grid-template-columns:1.15fr .85fr;gap:15px;margin-top:15px}
-.card h3{margin:0 0 13px;font-size:16px}.row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.row:last-child{border:0}
-button,.btn{background:var(--blue);color:white;border:0;border-radius:8px;padding:10px 14px;font-weight:650;cursor:pointer;text-decoration:none;display:inline-block}button.secondary,.btn.secondary{background:#edf3f8;color:#25445f;border:1px solid #dbe5ed}button.ghost{background:transparent;color:var(--blue);padding:5px}.toolbar{display:flex;gap:9px;flex-wrap:wrap}
-label{display:block;font-size:13px;font-weight:650;margin:12px 0 5px}input,select,textarea{width:100%;padding:10px 11px;border:1px solid #d4dde6;border-radius:8px;background:#fff;color:var(--ink);font:inherit}textarea{min-height:85px;resize:vertical}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.full{grid-column:1/-1}
-table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);vertical-align:top}th{color:#536476;background:#f7f9fb;font-size:12px}tr:last-child td{border:0}.tablewrap{overflow:auto}
-.tag{display:inline-block;border-radius:30px;padding:4px 8px;font-size:11px;font-weight:700;background:#eef2f6;color:#586879}.tag.ok{background:#e4f5ed;color:var(--green)}.tag.warn{background:#fff3d9;color:var(--amber)}.tag.bad{background:#fdeaea;color:var(--red)}
-.notice{padding:12px 14px;border-radius:9px;background:#eef6fc;border:1px solid #d8eaf8;color:#31536e;font-size:13px;margin:12px 0}
-.progress{height:8px;background:#e9eef3;border-radius:8px;overflow:hidden}.progress i{display:block;height:100%;background:var(--blue);width:0}
-.muted{color:var(--muted);font-size:12px}.empty{padding:24px;text-align:center;color:var(--muted)}
-footer{padding:18px;color:var(--muted);font-size:12px;text-align:center}
-@media(max-width:900px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line);padding:8px}.nav{flex-direction:row;overflow:auto}.nav button{white-space:nowrap;padding:9px}.grid{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}
-@media(max-width:560px){main{padding:16px}.grid,.formgrid{grid-template-columns:1fr}.full{grid-column:auto}header{padding:17px}}
-</style></head>
-<body>
-<header><div class="brand"><div class="logo">ABM</div><div><h1>Control de Compras y Contrataciones</h1><p>American Business Machine, SRL · Registro de Proveedores del Estado No. 9</p></div></div><div class="pill">RPE · ACTIVO · MIPYME PEQUEÑA EMPRESA</div></header>
-<div class="layout"><aside><nav class="nav">
-<button class="active" data-page="inicio">▦ &nbsp; Panel general</button>
-<button data-page="evaluar">✓ &nbsp; Evaluar proceso</button>
-<button data-page="procesos">▤ &nbsp; Procesos guardados</button>
-<button data-page="actividades">⌕ &nbsp; Actividades RPE</button>
-<button data-page="fuentes">↗ &nbsp; Consulta DGCP</button>
-</nav></aside>
-<main>
-<section class="page active" id="inicio">
-<div class="heading"><div><h2>Panel general</h2><p class="sub">Vista de compatibilidad de oportunidades con el registro RPE de ABM.</p></div><button onclick="showPage('evaluar')">+ Evaluar proceso</button></div>
-<div class="grid">
-<div class="card kpi"><small>Actividades RPE</small><strong id="kActivities">—</strong><span>Clasificaciones registradas</span></div>
-<div class="card kpi"><small>Procesos evaluados</small><strong id="kProcesses">0</strong><span>Guardados en este navegador</span></div>
-<div class="card kpi"><small>Compatibles</small><strong id="kCompatible">0</strong><span>Coincidencia de actividad</span></div>
-<div class="card kpi"><small>Revisión necesaria</small><strong id="kReview">0</strong><span>Sin evidencia suficiente o no coincide</span></div>
-</div>
-<div class="two"><div class="card"><h3>Evaluaciones recientes</h3><div id="recent" class="empty">Todavía no hay procesos evaluados.</div></div>
-<div class="card"><h3>Perfil del proveedor</h3>
-<div class="row"><span>Razón social</span><b>American Business Machine, SRL</b></div><div class="row"><span>RPE</span><b>9</b></div><div class="row"><span>Estado</span><span class="tag ok">Activo</span></div><div class="row"><span>MIPYME</span><b>Pequeña empresa</b></div><div class="row"><span>Provee</span><b>Servicios</b></div><div class="row"><span>Última actualización indicada</span><b>20/11/2026</b></div>
-</div></div>
-<div class="notice"><b>Alcance:</b> la evaluación determina coincidencia preliminar entre el objeto del proceso y las actividades comerciales de la constancia RPE. No certifica por sí sola la habilitación final, la elegibilidad legal ni el cumplimiento de todos los pliegos.</div>
-</section>
-<section class="page" id="evaluar">
-<div class="heading"><div><h2>Evaluar proceso</h2><p class="sub">Registra los datos del procedimiento o carga el pliego para revisarlo.</p></div></div>
-<div class="two"><div class="card"><h3>Datos del proceso</h3><div class="formgrid">
-<div><label>Referencia / código del proceso</label><input id="ref" placeholder="Ej. DGCP-CCC-LPN-2026-0001"></div>
-<div><label>Institución contratante</label><input id="institution" placeholder="Nombre de la institución"></div>
-<div class="full"><label>Objeto / descripción de la contratación *</label><textarea id="object" placeholder="Describe los bienes o servicios solicitados..." required></textarea></div>
-<div><label>Código UNSPSC (si aparece)</label><input id="code" placeholder="Ej. 43210000"></div>
-<div><label>Tipo de proceso</label><select id="type"><option>Bienes</option><option>Servicios</option><option>Obras</option><option>Consultoría</option><option>No especificado</option></select></div>
-<div><label>Presupuesto estimado (RD$)</label><input id="budget" type="number" min="0" placeholder="Opcional"></div>
-<div><label>Fecha límite de oferta</label><input id="deadline" type="date"></div>
-<div class="full"><label>Documentos del proceso (PDF, Word, Excel o texto)</label><input id="docs" type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"></div>
-<div class="full muted">En esta versión inicial, los archivos se seleccionan para referencia del operador. La extracción automática de texto de PDF/Word/Excel y su análisis completo requiere conectar un servicio de procesamiento en el servidor.</div>
-</div><div class="toolbar" style="margin-top:16px"><button onclick="evaluateProcess()">Evaluar compatibilidad</button><button class="secondary" onclick="clearForm()">Limpiar</button></div></div>
-<div class="card"><h3>Resultado de evaluación</h3><div id="result" class="empty">Completa el objeto del proceso y pulsa “Evaluar compatibilidad”.</div></div></div>
-</section>
-<section class="page" id="procesos">
-<div class="heading"><div><h2>Procesos guardados</h2><p class="sub">Historial local de las evaluaciones realizadas.</p></div><div class="toolbar"><button class="secondary" onclick="exportCSV()">Exportar CSV</button><button class="secondary" onclick="clearAll()">Borrar historial</button></div></div>
-<div class="card tablewrap"><table><thead><tr><th>Referencia</th><th>Objeto</th><th>Institución</th><th>Resultado</th><th>Fecha</th></tr></thead><tbody id="processRows"><tr><td colspan="5" class="empty">No hay registros.</td></tr></tbody></table></div>
-</section>
-<section class="page" id="actividades">
-<div class="heading"><div><h2>Actividades comerciales del RPE</h2><p class="sub">Clasificaciones transcritas de la constancia RPE adjunta (4 páginas).</p></div><input style="max-width:300px" id="filterActivity" placeholder="Filtrar por código o descripción" oninput="renderActivities()"></div>
-<div class="card tablewrap"><table><thead><tr><th>Código</th><th>Descripción registrada</th></tr></thead><tbody id="activityRows"></tbody></table></div>
-</section>
-<section class="page" id="fuentes">
-<div class="heading"><div><h2>Consulta de fuentes oficiales</h2><p class="sub">Acceso al portal público para localizar oportunidades y revisar sus documentos.</p></div></div>
-<div class="card"><h3>Fuentes oficiales DGCP</h3><p>La DGCP dispone de herramientas para consultar procesos, oportunidades vinculadas a rubros RPE y planes de compra. Usa estos accesos para localizar procedimientos y luego registra su referencia en este sistema.</p><div class="toolbar"><a class="btn" href="https://datosabiertos.dgcp.gob.do/" target="_blank" rel="noopener">Sistema de Información DGCP</a><a class="btn secondary" href="https://datosabiertos.dgcp.gob.do/datos-abiertos/apidgcp/docs" target="_blank" rel="noopener">Documentación API DGCP</a><a class="btn secondary" href="https://www.comprasdominicana.gob.do/" target="_blank" rel="noopener">Compras Dominicanas</a></div><div class="row"><b>DataCompras RD</b><a href="https://datosabiertos.dgcp.gob.do/" target="_blank" rel="noopener">Consultar procesos publicados ↗</a></div><div class="row"><b>ParticipaYa RD</b><a href="https://datosabiertos.dgcp.gob.do/" target="_blank" rel="noopener">Buscar oportunidades por actividades RPE ↗</a></div><div class="row"><b>PlanifícateYa RD</b><a href="https://datosabiertos.dgcp.gob.do/" target="_blank" rel="noopener">Consultar adquisiciones planificadas ↗</a></div><div class="notice"><b>Integración automática: diseño sujeto a API y condiciones DGCP.</b> La DGCP publica una API con endpoints para procesos, documentos, proveedores y PACC. Sus términos (actualizados el 21/04/2026) limitan el uso directo en aplicaciones comerciales de usuario final: exigen extraer datos de forma responsable, almacenarlos en infraestructura propia y servirlos desde esa infraestructura. Por eso, la conexión productiva debe hacerse mediante un backend de ABM con sincronización programada y caché; nunca desde el navegador de cada usuario. Esta versión inicial aún no incluye ese backend ni consulta datos en vivo.</div></div>
-<div class="card" style="margin-top:15px"><h3>Flujo de trabajo recomendado</h3><div class="row"><b>1. Buscar</b><span>Localizar proceso en el portal oficial</span></div><div class="row"><b>2. Documentar</b><span>Copiar referencia, objeto y entidad</span></div><div class="row"><b>3. Evaluar</b><span>Comparar con las actividades registradas en RPE</span></div><div class="row"><b>4. Validar</b><span>Revisar pliego, requisitos legales, técnicos y financieros</span></div><div class="row"><b>5. Reportar</b><span>Guardar resultado y exportar el historial</span></div></div>
-</section>
-<footer>ABM · Herramienta preliminar de apoyo a la revisión de oportunidades. Verificar siempre la constancia vigente y los documentos oficiales del procedimiento.</footer>
-</main></div>
-<script>
-const activities=[
-["44120000","Suministros de oficina"],["43210000","Equipo informático y accesorios"],["81110000","Servicios informáticos"],["56100000","Muebles de alojamiento"],["46170000","Seguridad, vigilancia y detección"],["14110000","Productos de papel"],
-["44100000","Maquinaria, suministros y accesorios de oficina"],["24140000","Suministros de embalaje"],["26120000","Alambres, cables y arneses"],["39120000","Equipos, suministros y componentes eléctricos"],["26110000","Baterías y generadores y transmisión de energía cinética"],["40100000","Calefacción, ventilación y circulación del aire"],["31160000","Ferretería"],["31190000","Materiales de afilado pulido y alisado"],["31210000","Pinturas y bases y acabados"],["31260000","Cubiertas, cajas y envolturas"],["31240000","Óptica industrial"],["32100000","Circuitos impresos, circuitos integrados y micro ensamblajes"],["39100000","Lámparas y bombillas y componentes para lámparas"],["39110000","Iluminación, artefactos y accesorios"],["43190000","Dispositivos de comunicaciones y accesorios"],["43230000","Software"],["45110000","Equipos de audio y video para presentación y composición"],["45120000","Equipo de vídeo, filmación o fotografía"],
-["82120000","Servicios de reproducción"],["47130000","Suministros de aseo y limpieza"],["48110000","Máquinas expendedoras"],["54110000","Relojes"],["60100000","Materiales didácticos profesionales y de desarrollo y accesorios y suministros"],["55120000","Etiquetado y accesorios"],["14120000","Papel para uso industrial"],["52160000","Electrónica de consumo"],["43220000","Equipos o plataformas y accesorios de redes multimedia o de voz y datos"],["45100000","Equipo de imprenta y publicación"],["52140000","Aparatos electrodomésticos"],["43200000","Componentes para tecnología de la información, difusión o telecomunicaciones"],["30200000","Estructuras prefabricadas"],["30220000","Estructuras permanentes"],["72100000","Servicios de mantenimiento y reparaciones de construcciones e instalaciones"],["81100000","Servicios profesionales de ingeniería"],["82100000","Publicidad"],["27110000","Herramientas de mano"],
-["32110000","Dispositivo semiconductor discreto"],["32120000","Componentes pasivos discretos"],["32130000","Piezas de componentes y hardware electrónicos y accesorios"],["32140000","Dispositivos de tubo electrónico y accesorios"],["47120000","Equipo de aseo"],["82130000","Servicios fotográficos"],["60120000","Equipo, accesorios y suministros de arte y manualidades"],["31200000","Adhesivos y selladores"],["41110000","Instrumentos de medida, observación y ensayo"],["24120000","Materiales de empaque"],["24110000","Recipientes y almacenamiento"],["60140000","Juguetes y juegos"],["12170000","Colorantes"],["80160000","Servicios de administración de empresas"]
-];
-let records=JSON.parse(localStorage.getItem('abmProcesses')||'[]');
-function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));if(id==='procesos')renderRecords();if(id==='inicio')renderDashboard()}
-document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
-function normalize(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
-function evaluateProcess(){
- const object=document.getElementById('object').value.trim(), code=document.getElementById('code').value.trim(), ref=document.getElementById('ref').value.trim(), institution=document.getElementById('institution').value.trim();
- if(!object){alert('Escribe el objeto o descripción del proceso.');return}
- let matches=[];
- if(code){matches=activities.filter(a=>a[0]===code); }
- if(!matches.length){const words=normalize(object).split(/[^a-z0-9]+/).filter(w=>w.length>3);matches=activities.filter(a=>{const d=normalize(a[1]);return words.some(w=>d.includes(w))||d.split(/[^a-z0-9]+/).filter(w=>w.length>3).some(w=>words.includes(w))})}
- const exact=code&&activities.some(a=>a[0]===code);
- let status=matches.length?'Coincidencia preliminar':'No identificada';
- let cls=matches.length?'warn':'bad';
- if(exact){status='Código RPE coincidente';cls='ok'}
- const files=[...document.getElementById('docs').files].map(f=>f.name);
- const item={id:Date.now(),ref:ref||'Sin referencia',institution,object,code,status,cls,matches:matches.slice(0,8),date:new Date().toLocaleDateString('es-DO'),files};
- records.unshift(item);localStorage.setItem('abmProcesses',JSON.stringify(records));
- const el=document.getElementById('result');
- el.innerHTML=`<span class="tag ${cls}">${status}</span><h3 style="margin-top:14px">${matches.length?'Actividades relacionadas':'No se encontró una coincidencia automática'}</h3>${matches.length?'<ul>'+matches.slice(0,8).map(a=>`<li><b>${a[0]}</b> — ${a[1]}</li>`).join('')+'</ul>':'<p>Requiere revisión manual del objeto, alcance y clasificación UNSPSC.</p>'}<p class="muted">Documentos indicados: ${files.length?files.join(', '):'ninguno'}</p><div class="notice">Resultado orientativo basado en coincidencia textual/código con la constancia cargada. No equivale a una evaluación jurídica ni a una validación oficial de la DGCP.</div><button class="secondary" onclick="window.print()">Imprimir evaluación</button>`;
- renderDashboard();
+:root {
+  --navy:#102b46;
+  --blue:#1769aa;
+  --cyan:#e8f3fb;
+  --ink:#172536;
+  --muted:#6d7b8b;
+  --line:#e3e9ef;
+  --bg:#f4f7fa;
+  --green:#16845b;
+  --amber:#a66a00;
+  --red:#b33b3b;
 }
-function clearForm(){['ref','institution','object','code','budget','deadline'].forEach(id=>document.getElementById(id).value='');document.getElementById('docs').value='';document.getElementById('result').innerHTML='Completa el objeto del proceso y pulsa “Evaluar compatibilidad”.'}
-function renderActivities(){const q=normalize(document.getElementById('filterActivity').value);document.getElementById('activityRows').innerHTML=activities.filter(a=>normalize(a.join(' ')).includes(q)).map(a=>`<tr><td><b>${a[0]}</b></td><td>${a[1]}</td></tr>`).join('')}
-function renderRecords(){const body=document.getElementById('processRows');body.innerHTML=records.length?records.map(r=>`<tr><td>${r.ref}</td><td>${r.object}</td><td>${r.institution||'—'}</td><td><span class="tag ${r.cls}">${r.status}</span></td><td>${r.date}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">No hay registros.</td></tr>'}
-function renderDashboard(){document.getElementById('kActivities').textContent=activities.length;document.getElementById('kProcesses').textContent=records.length;document.getElementById('kCompatible').textContent=records.filter(r=>r.cls==='ok').length;document.getElementById('kReview').textContent=records.filter(r=>r.cls!=='ok').length;document.getElementById('recent').innerHTML=records.length?records.slice(0,5).map(r=>`<div class="row"><span><b>${r.ref}</b><br><small>${r.object.slice(0,75)}</small></span><span class="tag ${r.cls}">${r.status}</span></div>`).join(''):'<div class="empty">Todavía no hay procesos evaluados.</div>'}
-function exportCSV(){const rows=[['Referencia','Institución','Objeto','Código','Resultado','Fecha'],...records.map(r=>[r.ref,r.institution,r.object,r.code,r.status,r.date])];const csv=rows.map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(';')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='ABM_procesos_evaluados.csv';a.click();URL.revokeObjectURL(a.href)}
-function clearAll(){if(confirm('¿Borrar el historial guardado en este navegador?')){records=[];localStorage.removeItem('abmProcesses');renderRecords();renderDashboard()}}
-renderActivities();renderDashboard();
-</script></body></html>
+* {box-sizing:border-box}
+body {
+  margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.45 Inter,Segoe UI,Arial,sans-serif
+}
+button,.btn {
+  background:var(--blue);color:white;border:0;border-radius:8px;
+  padding:10px 14px;font-weight:650;cursor:pointer;
+  text-decoration:none;display:inline-block
+}
+button.secondary,.btn.secondary {
+  background:#edf3f8;color:#25445f;border:1px solid #dbe5ed
+}
+button:disabled {opacity:.6;cursor:wait}
+label {display:block;font-size:13px;font-weight:650;margin:12px 0 5px}
+input,select,textarea {
+  width:100%;padding:10px 11px;border:1px solid #d4dde6;
+  border-radius:8px;background:#fff;color:var(--ink);font:inherit
+}
+textarea {min-height:85px;resize:vertical}
+header {
+  background:linear-gradient(120deg,#102b46,#174e78);
+  color:white;padding:22px 28px;display:flex;
+  justify-content:space-between;align-items:center;
+  gap:18px;flex-wrap:wrap
+}
+.brand {display:flex;gap:13px;align-items:center}
+.logo {
+  width:46px;height:46px;border-radius:12px;background:#fff;
+  color:var(--navy);display:grid;place-items:center;
+  font-weight:900;font-size:18px
+}
+h1 {font-size:21px;margin:0}
+header p {margin:3px 0 0;color:#d4e5f4;font-size:13px}
+.pill {border:1px solid #7ba5c8;padding:7px 12px;border-radius:30px;font-size:12px}
+.layout {display:grid;grid-template-columns:235px 1fr;min-height:calc(100vh - 90px)}
+aside {background:#fff;border-right:1px solid var(--line);padding:18px 12px}
+.nav {display:flex;flex-direction:column;gap:6px}
+.nav button {
+  border:0;background:transparent;text-align:left;padding:12px;
+  border-radius:9px;color:#435366;cursor:pointer;font-weight:600
+}
+.nav button.active,.nav button:hover {background:var(--cyan);color:var(--blue)}
+main {padding:26px;max-width:1450px;width:100%;margin:auto}
+.page {display:none}
+.page.active {display:block}
+.heading {
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:16px;margin-bottom:20px;flex-wrap:wrap
+}
+h2 {margin:0 0 5px;font-size:24px}
+.sub {color:var(--muted);margin:0}
+.grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.card {
+  background:#fff;border:1px solid var(--line);border-radius:13px;
+  padding:17px;box-shadow:0 2px 7px #102b4608
+}
+.kpi small {color:var(--muted)}
+.kpi strong {display:block;font-size:26px;margin:7px 0}
+.kpi span {font-size:12px;color:var(--muted)}
+.two {display:grid;grid-template-columns:1.15fr .85fr;gap:15px;margin-top:15px}
+.card h3 {margin:0 0 13px;font-size:16px}
+.row {
+  display:flex;justify-content:space-between;gap:12px;
+  padding:10px 0;border-bottom:1px solid var(--line)
+}
+.row:last-child {border:0}
+.toolbar {display:flex;gap:9px;flex-wrap:wrap}
+.formgrid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.full {grid-column:1/-1}
+table {width:100%;border-collapse:collapse;font-size:13px}
+th,td {
+  text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);
+  vertical-align:top
+}
+th {color:#536476;background:#f7f9fb;font-size:12px}
+tr:last-child td {border:0}
+.tablewrap {overflow:auto}
+.tag {
+  display:inline-block;border-radius:30px;padding:4px 8px;
+  font-size:11px;font-weight:700;background:#eef2f6;color:#586879
+}
+.tag.ok {background:#e4f5ed;color:var(--green)}
+.tag.warn {background:#fff3d9;color:var(--amber)}
+.tag.bad {background:#fdeaea;color:var(--red)}
+.notice {
+  padding:12px 14px;border-radius:9px;background:#eef6fc;
+  border:1px solid #d8eaf8;color:#31536e;font-size:13px;margin:12px 0
+}
+.muted {color:var(--muted);font-size:12px}
+.empty {padding:24px;text-align:center;color:var(--muted)}
+footer {padding:18px;color:var(--muted);font-size:12px;text-align:center}
+
+/* Pantalla de acceso */
+.login-screen {
+  min-height:100vh;display:none;align-items:center;
+  justify-content:center;padding:20px;
+  background:linear-gradient(135deg,#102b46,#1769aa)
+}
+body:not(.authenticated) .login-screen {display:flex}
+body:not(.authenticated) header,
+body:not(.authenticated) .layout,
+body:not(.authenticated) footer {display:none}
+.login-card {
+  width:100%;max-width:420px;background:white;
+  padding:32px;border-radius:16px;box-shadow:0 15px 45px #0003
+}
+.login-logo {
+  width:58px;height:58px;margin:0 auto 15px;
+  display:grid;place-items:center;border-radius:14px;
+  background:var(--navy);color:white;font-size:22px;font-weight:900
+}
+.login-card h2,.login-description {text-align:center}
+.login-card button {width:100%;margin-top:18px}
+.login-error {
+  display:none;margin-top:12px;padding:10px;border-radius:8px;
+  color:#a22;background:#fdeaea;font-size:13px
+}
+.user-info {font-size:12px;color:#d4e5f4}
+@media(max-width:900px) {
+  .layout {grid-template-columns:1fr}
+  aside {border-right:0;border-bottom:1px solid var(--line);padding:8px}
+  .nav {flex-direction:row;overflow:auto}
+  .nav button {white-space:nowrap;padding:9px}
+  .grid {grid-template-columns:repeat(2,1fr)}
+  .two {grid-template-columns:1fr}
+}
+@media(max-width:560px) {
+  main {padding:16px}
+  .grid,.formgrid {grid-template-columns:1fr}
+  .full {grid-column:auto}
+  header {padding:17px}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ACCESO -->
+<div class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">CC</div>
+    <h2>Control de Compras</h2>
+    <p class="login-description sub">Sistema de Compras y Contrataciones</p>
+
+    <form id="loginForm">
+      <label for="loginEmail">Correo electrónico</label>
+      <input id="loginEmail" type="email"
+        placeholder="usuario@empresa.com"
+        autocomplete="username" required>
+
+      <label for="loginPassword">Contraseña</label>
+      <input id="loginPassword" type="password"
+        placeholder="Introduce tu contraseña"
+        autocomplete="current-password" required>
+
+      <div id="loginError" class="login-error"></div>
+      <button id="loginButton" type="submit">Iniciar sesión</button>
+    </form>
+
+    <p class="muted" style="text-align:center;margin-top:18px">
+      Acceso exclusivo para usuarios autorizados.
+    </p>
+  </div>
+</div>
+
+<!-- ENCABEZADO -->
+<header>
+  <div class="brand">
+    <div class="logo">CC</div>
+    <div>
+      <h1>Control de Compras y Contrataciones</h1>
+      <p>Gestión de procesos, proveedores y contrataciones</p>
+    </div>
+  </div>
+  <div>
+    <span class="pill">PLATAFORMA DE GESTIÓN</span>
+    <div id="userInfo" class="user-info"></div>
+    <button id="logoutBtn" class="secondary" type="button">Cerrar sesión</button>
+  </div>
+</header>
+
+<div class="layout">
+<aside>
+<nav class="nav">
+  <button class="active" data-page="inicio">▦ &nbsp; Panel general</button>
+  <button data-page="evaluar">✓ &nbsp; Evaluar proceso</button>
+  <button data-page="procesos">▤ &nbsp; Procesos guardados</button>
+  <button data-page="actividades">⌕ &nbsp; Actividades RPE</button>
+  <button data-page="fuentes">↗ &nbsp; Consulta DGCP</button>
+</nav>
+</aside>
+
+<main>
+
+<section class="page active" id="inicio">
+  <div class="heading">
+    <div>
+      <h2>Panel general</h2>
+      <p class="sub">Vista de compatibilidad de oportunidades con el registro RPE.</p>
+    </div>
+    <button onclick="showPage('evaluar')">+ Evaluar proceso</button>
+  </div>
+
+  <div class="grid">
+    <div class="card kpi"><small>Actividades RPE</small><strong id="kActivities">—</strong><span>Clasificaciones registradas</span></div>
+    <div class="card kpi"><small>Procesos evaluados</small><strong id="kProcesses">0</strong><span>Guardados en este navegador</span></div>
+    <div class="card kpi"><small>Compatibles</small><strong id="kCompatible">0</strong><span>Coincidencia de actividad</span></div>
+    <div class="card kpi"><small>Revisión necesaria</small><strong id="kReview">0</strong><span>Sin evidencia suficiente o no coincide</span></div>
+  </div>
+
+  <div class="two">
+    <div class="card">
+      <h3>Evaluaciones recientes</h3>
+      <div id="recent" class="empty">Todavía no hay procesos evaluados.</div>
+    </div>
+    <div class="card">
+      <h3>Perfil del proveedor</h3>
+      <div class="row"><span>Razón social</span><b>American Business Machine, SRL</b></div>
+      <div class="row"><span>RPE</span><b>9</b></div>
+      <div class="row"><span>Estado</span><span class="tag ok">Activo</span></div>
+      <div class="row"><span>MIPYME</span><b>Pequeña empresa</b></div>
+      <div class="row"><span>Provee</span><b>Servicios</b></div>
+    </div>
+  </div>
+  <div class="notice">
+    <b>Alcance:</b> la evaluación determina coincidencia preliminar entre el objeto
+    del proceso y las actividades comerciales. No certifica la habilitación final
+    ni el cumplimiento de todos los pliegos.
+  </div>
+</section>
+
+<section class="page" id="evaluar">
+  <div class="heading">
+    <div><h2>Evaluar proceso</h2><p class="sub">Registra los datos del procedimiento.</p></div>
+  </div>
+  <div class="two">
+    <div class="card">
+      <h3>Datos del proceso</h3>
+      <div class="formgrid">
+        <div><label>Referencia / código del proceso</label><input id="ref" placeholder="Ej. DGCP-CCC-LPN-2026-0001"></div>
+        <div><label>Institución contratante</label><input id="institution" placeholder="Nombre de la institución"></div>
+        <div class="full"><label>Objeto / descripción *</label><textarea id="object" placeholder="Describe los bienes o servicios solicitados..."></textarea></div>
+        <div><label>Código UNSPSC</label><input id="code" placeholder="Ej. 43210000"></div>
+        <div><label>Tipo de proceso</label><select id="type"><option>Bienes</option><option>Servicios</option><option>Obras</option><option>Consultoría</option><option>No especificado</option></select></div>
+        <div><label>Presupuesto estimado (RD$)</label><input id="budget" type="number" min="0"></div>
+        <div><label>Fecha límite de oferta</label><input id="deadline" type="date"></div>
+        <div class="full"><label>Documentos del proceso</label><input id="docs" type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"></div>
+      </div>
+      <div class="toolbar" style="margin-top:16px">
+        <button onclick="evaluateProcess()">Evaluar compatibilidad</button>
+        <button class="secondary" onclick="clearForm()">Limpiar</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Resultado de evaluación</h3>
+      <div id="result" class="empty">Completa el objeto del proceso y pulsa “Evaluar compatibilidad”.</div>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="procesos">
+  <div class="heading">
+    <div><h2>Procesos guardados</h2><p class="sub">Historial local de evaluaciones.</p></div>
+    <div class="toolbar">
+      <button class="secondary" onclick="exportCSV()">Exportar CSV</button>
+      <button class="secondary" onclick="clearAll()">Borrar historial</button>
+    </div>
+  </div>
+  <div class="card tablewrap">
+    <table>
+      <thead><tr><th>Referencia</th><th>Objeto</th><th>Institución</th><th>Resultado</th><th>Fecha</th></tr></thead>
+      <tbody id="processRows"><tr><td colspan="5" class="empty">No hay registros.</td></tr></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="page" id="actividades">
+  <div class="heading">
+    <div><h2>Actividades comerciales RPE</h2><p class="sub">Clasificaciones registradas.</p></div>
+    <input style="max-width:300px" id="filterActivity" placeholder="Filtrar por código o descripción">
+  </div>
+  <div class="card tablewrap">
+    <table><thead><tr><th>Código</th><th>Descripción registrada</th></tr></thead><tbody id="activityRows"></tbody></table>
+  </div>
+</section>
+
+<section class="page" id="fuentes">
+  <div class="heading">
+    <div><h2>Consulta de fuentes oficiales</h2><p class="sub">Acceso a portales oficiales.</p></div>
+  </div>
+  <div class="card">
+    <h3>Fuentes oficiales DGCP</h3>
+    <p>Consulta los procesos y oportunidades publicados por la Dirección General de Contrataciones Públicas.</p>
+    <div class="toolbar">
+      <a class="btn" href="https://datosabiertos.dgcp.gob.do/" target="_blank" rel="noopener">Sistema de Información DGCP</a>
+      <a class="btn secondary" href="https://datosabiertos.dgcp.gob.do/datos-abiertos/apidgcp/docs" target="_blank" rel="noopener">Documentación API DGCP</a>
+      <a class="btn secondary" href="https://www.comprasdominicana.gob.do/" target="_blank" rel="noopener">Compras Dominicanas</a>
+    </div>
+    <div class="notice">
+      La consulta automática de datos DGCP requiere una integración de servidor
+      y sincronización con infraestructura propia. Esta versión aún no incluye
+      esa integración.
+    </div>
+  </div>
+</section>
+
+<footer>Control de Compras y Contrataciones · Herramienta de apoyo a la gestión.</footer>
+</main>
+</div>
+
+<script>
+"use strict";
+
+/* CONFIGURACIÓN */
+const API_URL = "https://controldecomputo-api.ingnatanael2.workers.dev";
+const TOKEN_KEY = "cc_access_token";
+
+/* ACTIVIDADES RPE */
+const activities = [
+["44120000","Suministros de oficina"],
+["43210000","Equipo informático y accesorios"],
+["81110000","Servicios informáticos"],
+["56100000","Muebles de alojamiento"],
+["46170000","Seguridad, vigilancia y detección"],
+["14110000","Productos de papel"],
+["44100000","Maquinaria, suministros y accesorios de oficina"],
+["24140000","Suministros de embalaje"],
+["26120000","Alambres, cables y arneses"],
+["39120000","Equipos, suministros y componentes eléctricos"],
+["26110000","Baterías y generadores y transmisión de energía cinética"],
+["40100000","Calefacción, ventilación y circulación del aire"],
+["31160000","Ferretería"],
+["31190000","Materiales de afilado pulido y alisado"],
+["31210000","Pinturas y bases y acabados"],
+["31260000","Cubiertas, cajas y envolturas"],
+["31240000","Óptica industrial"],
+["32100000","Circuitos impresos, circuitos integrados y micro ensamblajes"],
+["39100000","Lámparas y bombillas y componentes para lámparas"],
+["39110000","Iluminación, artefactos y accesorios"],
+["43190000","Dispositivos de comunicaciones y accesorios"],
+["43230000","Software"],
+["45110000","Equipos de audio y video para presentación y composición"],
+["45120000","Equipo de vídeo, filmación o fotografía"],
+["82120000","Servicios de reproducción"],
+["47130000","Suministros de aseo y limpieza"],
+["48110000","Máquinas expendedoras"],
+["54110000","Relojes"],
+["60100000","Materiales didácticos profesionales y de desarrollo y accesorios y suministros"],
+["55120000","Etiquetado y accesorios"],
+["14120000","Papel para uso industrial"],
+["52160000","Electrónica de consumo"],
+["43220000","Equipos o plataformas y accesorios de redes multimedia o de voz y datos"],
+["45100000","Equipo de imprenta y publicación"],
+["52140000","Aparatos electrodomésticos"],
+["43200000","Componentes para tecnología de la información, difusión o telecomunicaciones"],
+["30200000","Estructuras prefabricadas"],
+["30220000","Estructuras permanentes"],
+["72100000","Servicios de mantenimiento y reparaciones de construcciones e instalaciones"],
+["81100000","Servicios profesionales de ingeniería"],
+["82100000","Publicidad"],
+["27110000","Herramientas de mano"],
+["32110000","Dispositivo semiconductor discreto"],
+["32120000","Componentes pasivos discretos"],
+["32130000","Piezas de componentes y hardware electrónicos y accesorios"],
+["32140000","Dispositivos de tubo electrónico y accesorios"],
+["47120000","Equipo de aseo"],
+["82130000","Servicios fotográficos"],
+["60120000","Equipo, accesorios y suministros de arte y manualidades"],
+["31200000","Adhesivos y selladores"],
+["41110000","Instrumentos de medida, observación y ensayo"],
+["24120000","Materiales de empaque"],
+["24110000","Recipientes y almacenamiento"],
+["60140000","Juguetes y juegos"],
+["12170000","Colorantes"],
+["80160000","Servicios de administración de empresas"]
+];
+
+/* SESIÓN */
+let currentUser = null;
+let records = [];
+
+try {
+  records = JSON.parse(localStorage.getItem("abmProcesses") || "[]");
+  if (!Array.isArray(records)) records = [];
+} catch {
+  records = [];
+}
+
+const loginForm = document.getElementById("loginForm");
+const loginButton = document.getElementById("loginButton");
+const loginError = document.getElementById("loginError");
+
+function showLoginError(message) {
+  loginError.textContent = message;
+  loginError.style.display = "block";
+}
+
+async function apiLogin(email, password) {
+  const response = await fetch(`${API_URL}/api/login`, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({email,password})
+  });
+
+  const data = await response.json();
+
+  if (!response.ok || !data.access_token) {
+    throw new Error(data.error || "No se pudo iniciar sesión.");
+  }
+
+  return data;
+}
+
+async function validateSession(token) {
+  const response = await fetch(`${API_URL}/api/me`, {
+    headers: {"Authorization":`Bearer ${token}`}
+  });
+
+  if (!response.ok) return null;
+
+  const data = await response.json();
+  return data.user || null;
+}
+
+function enterApplication(user) {
+  currentUser = user;
+  document.body.classList.add("authenticated");
+
+  const name = user.full_name || user.email;
+  const role = user.is_platform_admin ? "Administrador general" : "Usuario";
+  document.getElementById("userInfo").textContent = `${name} · ${role}`;
+
+  renderDashboard();
+  renderRecords();
+}
+
+function logout() {
+  sessionStorage.removeItem(TOKEN_KEY);
+  currentUser = null;
+  document.body.classList.remove("authenticated");
+  document.getElementById("loginPassword").value = "";
+}
+
+loginForm.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  loginError.style.display = "none";
+  loginButton.disabled = true;
+  loginButton.textContent = "Validando acceso...";
+
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+
+  try {
+    const loginData = await apiLogin(email,password);
+    const token = loginData.access_token;
+
+    const user = await validateSession(token);
+
+    if (!user) {
+      throw new Error("No se pudo validar el perfil del usuario.");
+    }
+
+    sessionStorage.setItem(TOKEN_KEY,token);
+    loginForm.reset();
+    enterApplication(user);
+
+  } catch(error) {
+    showLoginError(error.message || "Error de conexión con el servidor.");
+  } finally {
+    loginButton.disabled = false;
+    loginButton.textContent = "Iniciar sesión";
+  }
+});
+
+document.getElementById("logoutBtn").addEventListener("click",logout);
+
+async function restoreSession() {
+  const token = sessionStorage.getItem(TOKEN_KEY);
+  if (!token) return;
+
+  try {
+    const user = await validateSession(token);
+    if (user) {
+      enterApplication(user);
+    } else {
+      sessionStorage.removeItem(TOKEN_KEY);
+    }
+  } catch {
+    sessionStorage.removeItem(TOKEN_KEY);
+  }
+}
+
+/* NAVEGACIÓN */
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(page => {
+    page.classList.toggle("active",page.id === id);
+  });
+  document.querySelectorAll(".nav button").forEach(button => {
+    button.classList.toggle("active",button.dataset.page === id);
+  });
+
+  if (id === "procesos") renderRecords();
+  if (id === "inicio") renderDashboard();
+}
+
+document.querySelectorAll(".nav button").forEach(button => {
+  button.addEventListener("click",() => showPage(button.dataset.page));
+});
+
+/* UTILIDADES */
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g,char => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[char]);
+}
+
+function normalize(value) {
+  return (value || "").toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+}
+
+/* EVALUACIÓN */
+function evaluateProcess() {
+  const object = document.getElementById("object").value.trim();
+  const code = document.getElementById("code").value.trim();
+  const ref = document.getElementById("ref").value.trim();
+  const institution = document.getElementById("institution").value.trim();
+
+  if (!object) {
+    alert("Escribe el objeto o descripción del proceso.");
+    return;
+  }
+
+  let matches = [];
+
+  if (code) matches = activities.filter(a => a[0] === code);
+
+  if (!matches.length) {
+    const words = normalize(object).split(/[^a-z0-9]+/).filter(w => w.length > 3);
+    matches = activities.filter(a => {
+      const description = normalize(a[1]);
+      return words.some(word => description.includes(word)) ||
+        description.split(/[^a-z0-9]+/).filter(w => w.length > 3)
+          .some(word => words.includes(word));
+    });
+  }
+
+  const exact = code && activities.some(a => a[0] === code);
+  let status = matches.length ? "Coincidencia preliminar" : "No identificada";
+  let cls = matches.length ? "warn" : "bad";
+
+  if (exact) {
+    status = "Código RPE coincidente";
+    cls = "ok";
+  }
+
+  const files = [...document.getElementById("docs").files].map(f => f.name);
+
+  const item = {
+    id:Date.now(),
+    ref:ref || "Sin referencia",
+    institution,
+    object,
+    code,
+    status,
+    cls,
+    matches:matches.slice(0,8),
+    date:new Date().toLocaleDateString("es-DO"),
+    files
+  };
+
+  records.unshift(item);
+  localStorage.setItem("abmProcesses",JSON.stringify(records));
+
+  const el = document.getElementById("result");
+
+  el.innerHTML = `
+    <span class="tag ${cls}">${escapeHTML(status)}</span>
+    <h3 style="margin-top:14px">${matches.length ? "Actividades relacionadas" : "No se encontró coincidencia automática"}</h3>
+    ${matches.length
+      ? "<ul>" + matches.slice(0,8).map(a => `<li><b>${escapeHTML(a[0])}</b> — ${escapeHTML(a[1])}</li>`).join("") + "</ul>"
+      : "<p>Requiere revisión manual del objeto, alcance y clasificación UNSPSC.</p>"}
+    <p class="muted">Documentos indicados: ${files.length ? files.map(escapeHTML).join(", ") : "ninguno"}</p>
+    <div class="notice">Resultado orientativo basado en coincidencia textual/código. No equivale a una evaluación jurídica ni a una validación oficial.</div>
+    <button class="secondary" onclick="window.print()">Imprimir evaluación</button>
+  `;
+
+  renderDashboard();
+}
+
+function clearForm() {
+  ["ref","institution","object","code","budget","deadline"].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+  document.getElementById("docs").value = "";
+  document.getElementById("result").textContent =
+    "Completa el objeto del proceso y pulsa Evaluar compatibilidad.";
+}
+
+/* ACTIVIDADES */
+function renderActivities() {
+  const filter = normalize(document.getElementById("filterActivity").value);
+  document.getElementById("activityRows").innerHTML =
+    activities.filter(a => normalize(a.join(" ")).includes(filter))
+      .map(a => `<tr><td><b>${escapeHTML(a[0])}</b></td><td>${escapeHTML(a[1])}</td></tr>`)
+      .join("");
+}
+
+document.getElementById("filterActivity").addEventListener("input",renderActivities);
+
+/* HISTORIAL */
+function renderRecords() {
+  const body = document.getElementById("processRows");
+
+  body.innerHTML = records.length
+    ? records.map(r => `
+      <tr>
+        <td>${escapeHTML(r.ref)}</td>
+        <td>${escapeHTML(r.object)}</td>
+        <td>${escapeHTML(r.institution || "—")}</td>
+        <td><span class="tag ${escapeHTML(r.cls)}">${escapeHTML(r.status)}</span></td>
+        <td>${escapeHTML(r.date)}</td>
+      </tr>
+    `).join("")
+    : '<tr><td colspan="5" class="empty">No hay registros.</td></tr>';
+}
+
+function renderDashboard() {
+  document.getElementById("kActivities").textContent = activities.length;
+  document.getElementById("kProcesses").textContent = records.length;
+  document.getElementById("kCompatible").textContent =
+    records.filter(r => r.cls === "ok").length;
+  document.getElementById("kReview").textContent =
+    records.filter(r => r.cls !== "ok").length;
+
+  document.getElementById("recent").innerHTML = records.length
+    ? records.slice(0,5).map(r => `
+      <div class="row">
+        <span><b>${escapeHTML(r.ref)}</b><br>
+        <small>${escapeHTML(r.object.slice(0,75))}</small></span>
+        <span class="tag ${escapeHTML(r.cls)}">${escapeHTML(r.status)}</span>
+      </div>
+    `).join("")
+    : '<div class="empty">Todavía no hay procesos evaluados.</div>';
+}
+
+function exportCSV() {
+  const rows = [
+    ["Referencia","Institución","Objeto","Código","Resultado","Fecha"],
+    ...records.map(r => [r.ref,r.institution,r.object,r.code,r.status,r.date])
+  ];
+
+  const csv = rows.map(row =>
+    row.map(value => '"' + String(value || "").replace(/"/g,'""') + '"').join(";")
+  ).join("\n");
+
+  const blob = new Blob(["\ufeff" + csv],{type:"text/csv;charset=utf-8"});
+  const link = document.createElement("a");
+  const objectURL = URL.createObjectURL(blob);
+  link.href = objectURL;
+  link.download = "Control_Compras_procesos.csv";
+  link.click();
+  URL.revokeObjectURL(objectURL);
+}
+
+function clearAll() {
+  if (confirm("¿Borrar el historial guardado en este navegador?")) {
+    records = [];
+    localStorage.removeItem("abmProcesses");
+    renderRecords();
+    renderDashboard();
+  }
+}
+
+/* INICIO */
+renderActivities();
+renderDashboard();
+restoreSession();
+</script>
+
+</body>
+</html>
