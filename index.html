@@ -207,7 +207,6 @@ body:not(.authenticated) footer {display:none}
   <button class="active" data-page="inicio">▦ &nbsp; Panel general</button>
   <button data-page="evaluar">✓ &nbsp; Evaluar proceso</button>
   <button data-page="procesos">▤ &nbsp; Procesos guardados</button>
-  <button data-page="evaluaciones">☑ &nbsp; Evaluaciones realizadas</button>
   <button data-page="actividades">⌕ &nbsp; Actividades RPE</button>
   <button data-page="fuentes">↗ &nbsp; Consulta DGCP</button>
 </nav>
@@ -283,31 +282,16 @@ body:not(.authenticated) footer {display:none}
 
 <section class="page" id="procesos">
   <div class="heading">
-    <div><h2>Procesos guardados</h2><p class="sub">Listado de procedimientos almacenados en la base de datos, tanto DGCP como manuales.</p></div>
-    <button class="secondary" id="refreshDbProcesses" type="button">Actualizar desde servidor</button>
-  </div>
-  <div class="card tablewrap">
-    <h3>Procesos almacenados en la base de datos (D1)</h3>
-    <div class="muted" id="dbProcessSummary">Inicia sesión para consultar los procesos.</div>
-    <table>
-      <thead><tr><th>Código</th><th>Proceso</th><th>Institución</th><th>Origen</th><th>Estado</th><th>Publicación</th></tr></thead>
-      <tbody id="dbProcessRows"><tr><td colspan="6" class="empty">No se han consultado los procesos.</td></tr></tbody>
-    </table>
-  </div>
-</section>
-
-<section class="page" id="evaluaciones">
-  <div class="heading">
-    <div><h2>Evaluaciones realizadas</h2><p class="sub">Historial local de análisis de compatibilidad guardados en este navegador.</p></div>
+    <div><h2>Procesos guardados</h2><p class="sub">Historial local de evaluaciones.</p></div>
     <div class="toolbar">
       <button class="secondary" onclick="exportCSV()">Exportar CSV</button>
-      <button class="secondary" onclick="clearAll()">Borrar historial de evaluaciones</button>
+      <button class="secondary" onclick="clearAll()">Borrar historial</button>
     </div>
   </div>
   <div class="card tablewrap">
     <table>
       <thead><tr><th>Referencia</th><th>Objeto</th><th>Institución</th><th>Resultado</th><th>Fecha</th></tr></thead>
-      <tbody id="processRows"><tr><td colspan="5" class="empty">No hay evaluaciones.</td></tr></tbody>
+      <tbody id="processRows"><tr><td colspan="5" class="empty">No hay registros.</td></tr></tbody>
     </table>
   </div>
 </section>
@@ -431,7 +415,6 @@ const activities = [
 /* SESIÓN */
 let currentUser = null;
 let records = [];
-let dbProcesses = [];
 
 try {
   records = JSON.parse(localStorage.getItem("abmProcesses") || "[]");
@@ -486,13 +469,11 @@ function enterApplication(user) {
 
   renderDashboard();
   renderRecords();
-  refreshDbProcesses();
 }
 
 function logout() {
   sessionStorage.removeItem(TOKEN_KEY);
   currentUser = null;
-  dbProcesses = [];
   document.body.classList.remove("authenticated");
   document.getElementById("loginPassword").value = "";
 }
@@ -556,8 +537,7 @@ function showPage(id) {
     button.classList.toggle("active",button.dataset.page === id);
   });
 
-  if (id === "procesos") refreshDbProcesses();
-  if (id === "evaluaciones") renderRecords();
+  if (id === "procesos") renderRecords();
   if (id === "inicio") renderDashboard();
 }
 
@@ -665,39 +645,6 @@ function renderActivities() {
 }
 
 document.getElementById("filterActivity").addEventListener("input",renderActivities);
-
-/* PROCESOS EN D1: consulta autenticada al servidor */
-async function refreshDbProcesses() {
-  const body = document.getElementById("dbProcessRows");
-  const summary = document.getElementById("dbProcessSummary");
-  if (!currentUser) {
-    body.innerHTML = '<tr><td colspan="6" class="empty">Inicia sesión para consultar D1.</td></tr>';
-    summary.textContent = "Sesión no iniciada.";
-    return;
-  }
-  body.innerHTML = '<tr><td colspan="6" class="empty">Consultando procesos en D1...</td></tr>';
-  try {
-    const data = await apiRequest("/api/processes?limit=100&offset=0");
-    dbProcesses = Array.isArray(data.processes) ? data.processes : [];
-    body.innerHTML = dbProcesses.length ? dbProcesses.map(p => `
-      <tr>
-        <td><b>${escapeHTML(p.process_code || p.external_id || "—")}</b></td>
-        <td>${escapeHTML(p.title || "—")}</td>
-        <td>${escapeHTML(p.contracting_entity || "—")}</td>
-        <td><span class="tag ${p.source === "DGCP" ? "ok" : "warn"}">${escapeHTML(p.source || "—")}</span></td>
-        <td>${escapeHTML(p.status || "—")}</td>
-        <td>${escapeHTML(p.publication_date || "—")}</td>
-      </tr>`).join("")
-      : '<tr><td colspan="6" class="empty">No hay procesos almacenados en D1.</td></tr>';
-    summary.textContent = `${dbProcesses.length} procesos cargados (máximo 100 por consulta).`;
-    renderDashboard();
-  } catch (error) {
-    body.innerHTML = `<tr><td colspan="6" class="empty">${escapeHTML(error.message || "No se pudieron consultar los procesos.")}</td></tr>`;
-    summary.textContent = "Error al consultar D1.";
-  }
-}
-
-document.getElementById("refreshDbProcesses").addEventListener("click", refreshDbProcesses);
 
 /* HISTORIAL */
 function renderRecords() {
@@ -898,7 +845,6 @@ async function importSelectedDGCP() {
       `Importación completada: ${result.created || 0} nuevos y ${result.updated || 0} actualizados.`,
       "success"
     );
-    await refreshDbProcesses();
     await searchDGCP();
   } catch (error) {
     setDGCPMessage(error.message || "No se pudo completar la importación.", "error");
